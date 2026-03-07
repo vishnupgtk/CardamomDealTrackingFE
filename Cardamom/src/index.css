@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+:root {
+  --bg: #eef3ee;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --brand: #0f6a41;
+  --brand-2: #0b4f31;
+  --ring: #a7f3d0;
+}
+
+body {
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 600px at -10% -10%, #d7f6e2 0%, transparent 60%),
+    radial-gradient(1000px 500px at 110% 0%, #dbeafe 0%, transparent 55%),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-panel {
+  border: 1px solid rgb(226 232 240);
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px -24px rgb(15 23 42 / 50%);
+}
+
+.app-input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgb(203 213 225);
+  background: #fff;
+  padding: 10px 12px;
+  color: var(--text);
+  outline: none;
+}
+
+.app-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px var(--ring);
+}
