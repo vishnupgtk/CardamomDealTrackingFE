@@ -1,14 +1,18 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "https://localhost:7279/api",
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ??
+    "https://cardamom-api.onrender.com",
 });
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
@@ -18,8 +22,9 @@ apiClient.interceptors.response.use(
     if (error?.response?.status === 401) {
       localStorage.removeItem("token");
     }
+
     return Promise.reject(error);
-  },
+  }
 );
 
 export default apiClient;
