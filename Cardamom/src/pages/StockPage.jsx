@@ -26,6 +26,8 @@ const links = [
 const initialForm = {
   supplierName: "",
   totalKg: "",
+  sampleKgs: "",
+  excessKgs: "",
   pricePerKg: "",
   purchaseDate: new Date().toISOString().slice(0, 10),
   notes: "",
@@ -42,6 +44,29 @@ const actionBtnNeutral = `${actionBtnBase} border-slate-300 text-slate-700 hover
 const actionBtnSuccess = `${actionBtnBase} border-emerald-600 text-emerald-700 hover:bg-emerald-50 disabled:border-slate-300 disabled:text-slate-400`;
 const actionBtnDanger = `${actionBtnBase} border-rose-300 text-rose-700 hover:bg-rose-50 disabled:border-slate-200 disabled:text-slate-400`;
 const actionBtnRestore = `${actionBtnBase} border-emerald-300 text-emerald-700 hover:bg-emerald-50 disabled:border-slate-200 disabled:text-slate-400`;
+
+function normalizeStockRow(row) {
+  const totalKg = Number(row.totalKg ?? row.TotalKg ?? 0);
+  const sampleKgs = Number(row.sampleKgs ?? row.SampleKgs ?? 0);
+  const excessKgs = Number(row.excessKgs ?? row.ExcessKgs ?? 0);
+  const sellableKgs = Number(row.sellableKgs ?? row.SellableKgs ?? totalKg + sampleKgs + excessKgs);
+
+  return {
+    ...row,
+    purchaseId: row.purchaseId ?? row.PurchaseId,
+    supplierName: row.supplierName ?? row.SupplierName,
+    purchaseDate: row.purchaseDate ?? row.PurchaseDate,
+    totalKg,
+    sampleKgs,
+    excessKgs,
+    sellableKgs,
+    pricePerKg: Number(row.pricePerKg ?? row.PricePerKg ?? 0),
+    totalCost: Number(row.totalCost ?? row.TotalCost ?? 0),
+    remainingKg: Number(row.remainingKg ?? row.RemainingKg ?? 0),
+    totalPaid: Number(row.totalPaid ?? row.TotalPaid ?? 0),
+    pendingAmount: Number(row.pendingAmount ?? row.PendingAmount ?? 0),
+  };
+}
 
 export default function StockPage() {
   const [summary, setSummary] = useState(null);
@@ -92,10 +117,10 @@ export default function StockPage() {
       ]);
       setSummary(summaryRes);
       if (Array.isArray(rowsRes)) {
-        setRows(rowsRes);
+        setRows(rowsRes.map(normalizeStockRow));
         setPaging({ totalCount: rowsRes.length, totalPages: 1 });
       } else {
-        setRows(rowsRes.items ?? []);
+        setRows((rowsRes.items ?? []).map(normalizeStockRow));
         setPaging({ totalCount: rowsRes.totalCount ?? 0, totalPages: rowsRes.totalPages ?? 0 });
       }
     } finally {
@@ -123,9 +148,18 @@ export default function StockPage() {
     setSuccess("");
 
     const kg = Number(form.totalKg);
+    const sampleKgs = Number(form.sampleKgs || 0);
+    const excessKgs = Number(form.excessKgs || 0);
     const price = Number(form.pricePerKg);
 
-    if (!form.supplierName.trim() || !form.purchaseDate || kg <= 0 || price <= 0) {
+    if (
+      !form.supplierName.trim() ||
+      !form.purchaseDate ||
+      kg <= 0 ||
+      sampleKgs < 0 ||
+      excessKgs < 0 ||
+      price <= 0
+    ) {
       setError("Please fill all required fields with valid values.");
       return;
     }
@@ -135,6 +169,8 @@ export default function StockPage() {
       const payload = {
         supplierName: form.supplierName.trim(),
         totalKg: kg,
+        sampleKgs,
+        excessKgs,
         pricePerKg: price,
         purchaseDate: form.purchaseDate,
         notes: form.notes?.trim() || null,
@@ -178,6 +214,8 @@ export default function StockPage() {
     setForm({
       supplierName: row.supplierName,
       totalKg: String(row.totalKg),
+      sampleKgs: String(row.sampleKgs ?? 0),
+      excessKgs: String(row.excessKgs ?? 0),
       pricePerKg: String(row.pricePerKg),
       purchaseDate: safePurchaseDate,
       notes: row.notes ?? "",
@@ -412,6 +450,14 @@ export default function StockPage() {
             render: (r) => (r.purchaseDate ? new Date(r.purchaseDate).toLocaleDateString() : "-"),
           },
           { key: "totalKg", label: "Total Kg", render: (r) => formatKg(r.totalKg) },
+          { key: "sampleKgs", label: "Sample Kg", render: (r) => formatKg(Number(r.sampleKgs) || 0) },
+          { key: "excessKgs", label: "Excess Kg", render: (r) => formatKg(Number(r.excessKgs) || 0) },
+          {
+            key: "sellableKgs",
+            label: "Sellable Kg",
+            render: (r) =>
+              formatKg((Number(r.totalKg) || 0) + (Number(r.sampleKgs) || 0) + (Number(r.excessKgs) || 0)),
+          },
           { key: "pricePerKg", label: "Price/Kg", render: (r) => `${formatRs(r.pricePerKg)} / kg` },
           { key: "totalCost", label: "Total Cost", render: (r) => formatRs(r.totalCost) },
           { key: "remainingKg", label: "Remaining Kg", render: (r) => formatKg(r.remainingKg) },
@@ -587,6 +633,30 @@ export default function StockPage() {
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-emerald-600 focus:ring-2"
                     value={form.pricePerKg}
                     onChange={(e) => onChange("pricePerKg", e.target.value)}
+                    placeholder="0.00"
+                  />
+                </Field>
+
+                <Field label="Sample Kgs">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-emerald-600 focus:ring-2"
+                    value={form.sampleKgs}
+                    onChange={(e) => onChange("sampleKgs", e.target.value)}
+                    placeholder="0.00"
+                  />
+                </Field>
+
+                <Field label="Excess Kgs">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-emerald-600 focus:ring-2"
+                    value={form.excessKgs}
+                    onChange={(e) => onChange("excessKgs", e.target.value)}
                     placeholder="0.00"
                   />
                 </Field>
