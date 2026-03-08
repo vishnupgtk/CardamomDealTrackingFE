@@ -826,7 +826,7 @@ export default function SalesPage() {
                         className="grid items-center gap-2 sm:grid-cols-[1.8fr_1fr_1fr]"
                       >
                         <div className="text-sm text-slate-700">
-                          {s.supplierName} - remaining {formatKg(s.remainingKg)} @ {formatRs(s.pricePerKg)} / kg
+                          {s.supplierName} - sellable {formatKg(s.sellableKgs)} | remaining {formatKg(s.remainingKg)} @ {formatRs(s.pricePerKg)} / kg
                         </div>
                         <input
                           type="number"
