@@ -14,23 +14,60 @@ const parseJwt = (token) => {
   }
 };
 
+const isTokenExpired = (payload) => {
+  if (!payload?.exp) return false;
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  return payload.exp <= nowInSeconds;
+};
+
 const extractRole = (payload) => {
   if (!payload) return null;
   return payload.role ?? payload[ROLE_CLAIM] ?? null;
 };
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  const [user, setUser] = useState(() =>
-    parseJwt(localStorage.getItem("token")),
-  );
+  const [token, setToken] = useState(() => {
+    const storedToken = localStorage.getItem("token");
+    const parsed = parseJwt(storedToken);
+    if (!storedToken || !parsed || isTokenExpired(parsed)) {
+      localStorage.removeItem("token");
+      return null;
+    }
+    return storedToken;
+  });
+  const [user, setUser] = useState(() => {
+    const storedToken = localStorage.getItem("token");
+    const parsed = parseJwt(storedToken);
+    if (!storedToken || !parsed || isTokenExpired(parsed)) {
+      localStorage.removeItem("token");
+      return null;
+    }
+    return parsed;
+  });
   const [role, setRole] = useState(
-    () => localStorage.getItem("role") ?? extractRole(parseJwt(localStorage.getItem("token"))),
+    () => {
+      const storedToken = localStorage.getItem("token");
+      const parsed = parseJwt(storedToken);
+      if (!storedToken || !parsed || isTokenExpired(parsed)) {
+        localStorage.removeItem("role");
+        return null;
+      }
+      return localStorage.getItem("role") ?? extractRole(parsed);
+    },
   );
 
   const login = (jwt, userRole) => {
-    localStorage.setItem("token", jwt);
     const parsed = parseJwt(jwt);
+    if (!parsed || isTokenExpired(parsed)) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      setToken(null);
+      setUser(null);
+      setRole(null);
+      return;
+    }
+
+    localStorage.setItem("token", jwt);
     const resolvedRole = userRole ?? extractRole(parsed);
     if (resolvedRole) {
       localStorage.setItem("role", resolvedRole);
@@ -58,7 +95,7 @@ export function AuthProvider({ children }) {
       role,
       login,
       logout,
-      isAuthenticated: Boolean(token),
+      isAuthenticated: Boolean(token && user && !isTokenExpired(user)),
     }),
     [token, user, role],
   );
