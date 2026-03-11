@@ -4,6 +4,7 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="app-panel w-full max-w-3xl p-8 md:p-10">
+        <img src="/cae-logo.svg" alt="CAE Groups" className="h-12 w-auto" />
         <p className="inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-emerald-800">
           Cardamom Business Suite
         </p>

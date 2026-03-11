@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppShell from "../layout/AppShell";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { addExpenditure, getAdminDashboard, getExpenditures } from "../services/adminService";
@@ -23,6 +23,40 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  const [expenseSearch, setExpenseSearch] = useState("");
+  const [expensePage, setExpensePage] = useState(1);
+  const [expensePageSize, setExpensePageSize] = useState(5);
+
+  const filteredExpenditures = useMemo(() => {
+    const query = expenseSearch.trim().toLowerCase();
+    if (!query) return expenditures;
+
+    return expenditures.filter((item) => {
+      const dateText = item.expenseDate ? new Date(item.expenseDate).toLocaleDateString().toLowerCase() : "";
+      const amountText = String(item.amount ?? "").toLowerCase();
+      const byText = String(item.createdBy ?? "").toLowerCase();
+      const noteText = String(item.notes ?? "").toLowerCase();
+      return (
+        dateText.includes(query) ||
+        amountText.includes(query) ||
+        byText.includes(query) ||
+        noteText.includes(query)
+      );
+    });
+  }, [expenditures, expenseSearch]);
+
+  const expenseTotalPages = Math.max(1, Math.ceil(filteredExpenditures.length / expensePageSize));
+  const pagedExpenditures = useMemo(() => {
+    const safePage = Math.min(expensePage, expenseTotalPages);
+    const start = (safePage - 1) * expensePageSize;
+    return filteredExpenditures.slice(start, start + expensePageSize);
+  }, [filteredExpenditures, expensePage, expensePageSize, expenseTotalPages]);
+
+  useEffect(() => {
+    if (expensePage > expenseTotalPages) {
+      setExpensePage(expenseTotalPages);
+    }
+  }, [expensePage, expenseTotalPages]);
 
   const loadDashboard = async () => {
     try {
@@ -66,6 +100,7 @@ export default function AdminDashboard() {
         notes: "",
       });
       setFormSuccess("Expenditure added successfully.");
+      setExpensePage(1);
       await loadDashboard();
     } catch (err) {
       setFormError(err?.response?.data?.error ?? err?.response?.data?.message ?? "Failed to add expenditure.");
@@ -154,7 +189,32 @@ export default function AdminDashboard() {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3">
-              <h3 className="text-lg font-bold text-emerald-900">Recent Expenditures</h3>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-lg font-bold text-emerald-900">Recent Expenditures</h3>
+                <div className="flex gap-2">
+                  <input
+                    value={expenseSearch}
+                    onChange={(e) => {
+                      setExpenseSearch(e.target.value);
+                      setExpensePage(1);
+                    }}
+                    placeholder="Search date, amount, user, notes..."
+                    className="w-full min-w-[220px] rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-emerald-600 focus:ring-2"
+                  />
+                  <select
+                    value={expensePageSize}
+                    onChange={(e) => {
+                      setExpensePageSize(Number(e.target.value));
+                      setExpensePage(1);
+                    }}
+                    className="rounded-lg border border-slate-300 px-2 py-2 text-sm outline-none ring-emerald-600 focus:ring-2"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                  </select>
+                </div>
+              </div>
               <div className="mt-3 overflow-auto">
                 <table className="min-w-full text-sm">
                   <thead className="bg-slate-100">
@@ -166,14 +226,14 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {expenditures.length === 0 ? (
+                    {pagedExpenditures.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="px-3 py-6 text-center text-slate-500">
-                          No expenditures added yet.
+                          No expenditures found.
                         </td>
                       </tr>
                     ) : (
-                      expenditures.map((item) => (
+                      pagedExpenditures.map((item) => (
                         <tr key={item.expenditureId} className="border-t border-slate-100">
                           <td className="px-3 py-2 text-slate-700">{new Date(item.expenseDate).toLocaleDateString()}</td>
                           <td className="px-3 py-2 font-semibold text-slate-800">{formatRs(item.amount)}</td>
@@ -192,6 +252,29 @@ export default function AdminDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+              <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-sm text-slate-600">
+                <span>
+                  Showing {pagedExpenditures.length} of {filteredExpenditures.length} | Page {Math.min(expensePage, expenseTotalPages)} of {expenseTotalPages}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setExpensePage((p) => Math.max(1, p - 1))}
+                    disabled={expensePage <= 1}
+                    className="rounded border border-slate-300 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExpensePage((p) => Math.min(expenseTotalPages, p + 1))}
+                    disabled={expensePage >= expenseTotalPages}
+                    className="rounded border border-slate-300 px-3 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </div>
           </div>

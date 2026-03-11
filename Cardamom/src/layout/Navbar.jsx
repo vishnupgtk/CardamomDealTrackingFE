@@ -13,9 +13,12 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-emerald-100 bg-white/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 py-3 md:px-5">
-        <div>
-          <h1 className="text-xl font-extrabold tracking-tight text-emerald-900">CAE GROUPS</h1>
-          <p className="text-xs font-medium text-emerald-700">Inventory, deals, payments, and profits</p>
+        <div className="flex items-center gap-3">
+          <img src="/cae-logo.svg" alt="CAE Groups" className="h-10 w-auto" />
+          <div>
+            <h1 className="text-xl font-extrabold tracking-tight text-emerald-900">CAE GROUPS</h1>
+            <p className="text-xs font-medium text-emerald-700">Inventory, deals, payments, and profits</p>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
