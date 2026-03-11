@@ -28,6 +28,7 @@ const initialForm = {
   totalKg: "",
   sampleKgs: "",
   excessKgs: "",
+  brokerCharge: "",
   pricePerKg: "",
   purchaseDate: new Date().toISOString().slice(0, 10),
   notes: "",
@@ -50,6 +51,7 @@ function normalizeStockRow(row) {
   const sampleKgs = Number(row.sampleKgs ?? row.SampleKgs ?? 0);
   const excessKgs = Number(row.excessKgs ?? row.ExcessKgs ?? 0);
   const sellableKgs = Number(row.sellableKgs ?? row.SellableKgs ?? totalKg + sampleKgs + excessKgs);
+  const brokerCharge = Number(row.brokerCharge ?? row.BrokerCharge ?? 0);
 
   return {
     ...row,
@@ -60,8 +62,9 @@ function normalizeStockRow(row) {
     sampleKgs,
     excessKgs,
     sellableKgs,
+    brokerCharge,
     pricePerKg: Number(row.pricePerKg ?? row.PricePerKg ?? 0),
-    totalCost: Number(row.totalCost ?? row.TotalCost ?? 0),
+    totalCost: Number(row.totalCost ?? row.TotalCost ?? (totalKg * Number(row.pricePerKg ?? row.PricePerKg ?? 0)) + brokerCharge),
     remainingKg: Number(row.remainingKg ?? row.RemainingKg ?? 0),
     totalPaid: Number(row.totalPaid ?? row.TotalPaid ?? 0),
     pendingAmount: Number(row.pendingAmount ?? row.PendingAmount ?? 0),
@@ -135,8 +138,9 @@ export default function StockPage() {
   const totalCostPreview = useMemo(() => {
     const kg = Number(form.totalKg) || 0;
     const rate = Number(form.pricePerKg) || 0;
-    return kg * rate;
-  }, [form.totalKg, form.pricePerKg]);
+    const broker = Number(form.brokerCharge || 0);
+    return (kg * rate) + broker;
+  }, [form.totalKg, form.pricePerKg, form.brokerCharge]);
 
   const onChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -150,6 +154,7 @@ export default function StockPage() {
     const kg = Number(form.totalKg);
     const sampleKgs = Number(form.sampleKgs || 0);
     const excessKgs = Number(form.excessKgs || 0);
+    const brokerCharge = Number(form.brokerCharge || 0);
     const price = Number(form.pricePerKg);
 
     if (
@@ -158,6 +163,7 @@ export default function StockPage() {
       kg <= 0 ||
       sampleKgs < 0 ||
       excessKgs < 0 ||
+      brokerCharge < 0 ||
       price <= 0
     ) {
       setError("Please fill all required fields with valid values.");
@@ -171,6 +177,7 @@ export default function StockPage() {
         totalKg: kg,
         sampleKgs,
         excessKgs,
+        brokerCharge,
         pricePerKg: price,
         purchaseDate: form.purchaseDate,
         notes: form.notes?.trim() || null,
@@ -216,6 +223,7 @@ export default function StockPage() {
       totalKg: String(row.totalKg),
       sampleKgs: String(row.sampleKgs ?? 0),
       excessKgs: String(row.excessKgs ?? 0),
+      brokerCharge: String(row.brokerCharge ?? 0),
       pricePerKg: String(row.pricePerKg),
       purchaseDate: safePurchaseDate,
       notes: row.notes ?? "",
@@ -459,6 +467,7 @@ export default function StockPage() {
               formatKg((Number(r.totalKg) || 0) + (Number(r.sampleKgs) || 0) + (Number(r.excessKgs) || 0)),
           },
           { key: "pricePerKg", label: "Price/Kg", render: (r) => `${formatRs(r.pricePerKg)} / kg` },
+          { key: "brokerCharge", label: "Broker Charge", render: (r) => formatRs(r.brokerCharge) },
           { key: "totalCost", label: "Total Cost", render: (r) => formatRs(r.totalCost) },
           { key: "remainingKg", label: "Remaining Kg", render: (r) => formatKg(r.remainingKg) },
           { key: "totalPaid", label: "Paid", render: (r) => formatRs(r.totalPaid) },
@@ -633,6 +642,18 @@ export default function StockPage() {
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-emerald-600 focus:ring-2"
                     value={form.pricePerKg}
                     onChange={(e) => onChange("pricePerKg", e.target.value)}
+                    placeholder="0.00"
+                  />
+                </Field>
+
+                <Field label="Broker Charge">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-emerald-600 focus:ring-2"
+                    value={form.brokerCharge}
+                    onChange={(e) => onChange("brokerCharge", e.target.value)}
                     placeholder="0.00"
                   />
                 </Field>
