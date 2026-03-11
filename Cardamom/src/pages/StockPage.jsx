@@ -584,7 +584,7 @@ export default function StockPage() {
 
       {isModalOpen ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/50 p-4">
-          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl">
+          <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
               <h3 className="text-lg font-bold text-emerald-800">{editingStock ? "Edit Purchase Stock" : "Add Purchase Stock"}</h3>
               <button
@@ -596,7 +596,7 @@ export default function StockPage() {
               </button>
             </div>
 
-            <form onSubmit={onSubmit} className="space-y-4 p-5">
+            <form onSubmit={onSubmit} className="min-h-0 flex-1 overflow-y-auto space-y-4 p-5">
               {error ? (
                 <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
                   {error}
@@ -697,7 +697,7 @@ export default function StockPage() {
                 Estimated Total Cost: <span className="font-bold">{formatRs(totalCostPreview)}</span>
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="sticky bottom-0 flex justify-end gap-3 border-t border-slate-200 bg-white pt-3">
                 <button
                   type="button"
                   className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700"
