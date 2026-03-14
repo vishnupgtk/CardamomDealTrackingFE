@@ -100,6 +100,9 @@ export default function StockPage() {
   const [historyError, setHistoryError] = useState("");
   const [actionBusyKey, setActionBusyKey] = useState("");
   const hasDateFilters = Boolean(query.fromDate || query.toDate);
+  const isRestrictedEdit = Boolean(
+    editingStock && (Number(editingStock.totalPaid || 0) > 0 || Number(editingStock.remainingKg || 0) !== Number(editingStock.sellableKgs || 0)),
+  );
 
   const loadData = async () => {
     setLoading(true);
@@ -602,6 +605,11 @@ export default function StockPage() {
                   {error}
                 </div>
               ) : null}
+              {isRestrictedEdit ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  This stock already has usage or payments. Only sample kgs, excess kgs, and notes can be updated.
+                </div>
+              ) : null}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Dealer / Supplier" required>
@@ -610,6 +618,7 @@ export default function StockPage() {
                     value={form.supplierName}
                     onChange={(e) => onChange("supplierName", e.target.value)}
                     placeholder="Enter dealer name"
+                    disabled={isRestrictedEdit}
                   />
                 </Field>
 
@@ -619,6 +628,7 @@ export default function StockPage() {
                     className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-emerald-600 focus:ring-2"
                     value={form.purchaseDate}
                     onChange={(e) => onChange("purchaseDate", e.target.value)}
+                    disabled={isRestrictedEdit}
                   />
                 </Field>
 
@@ -631,6 +641,7 @@ export default function StockPage() {
                     value={form.totalKg}
                     onChange={(e) => onChange("totalKg", e.target.value)}
                     placeholder="0.00"
+                    disabled={isRestrictedEdit}
                   />
                 </Field>
 
@@ -643,6 +654,7 @@ export default function StockPage() {
                     value={form.pricePerKg}
                     onChange={(e) => onChange("pricePerKg", e.target.value)}
                     placeholder="0.00"
+                    disabled={isRestrictedEdit}
                   />
                 </Field>
 
@@ -655,6 +667,7 @@ export default function StockPage() {
                     value={form.brokerCharge}
                     onChange={(e) => onChange("brokerCharge", e.target.value)}
                     placeholder="0.00"
+                    disabled={isRestrictedEdit}
                   />
                 </Field>
 
