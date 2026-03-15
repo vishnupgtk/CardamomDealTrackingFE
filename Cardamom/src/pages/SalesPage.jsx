@@ -920,7 +920,7 @@ export default function SalesPage() {
 
       {editDeal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-          <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white shadow-2xl">
+          <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b px-5 py-4">
               <h3 className="text-lg font-bold text-emerald-800">Edit Sales Deal</h3>
               <button
@@ -931,7 +931,7 @@ export default function SalesPage() {
                 X
               </button>
             </div>
-            <form onSubmit={handleUpdateDeal} className="space-y-4 p-5">
+            <form onSubmit={handleUpdateDeal} className="min-h-0 flex-1 overflow-y-auto space-y-4 p-5">
               {editError ? (
                 <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
                   {editError}
@@ -992,7 +992,7 @@ export default function SalesPage() {
                   onChange={(e) => setEditForm((f) => ({ ...f, notes: e.target.value }))}
                 />
               </label>
-              <div className="flex justify-end gap-3 border-t pt-3">
+              <div className="sticky bottom-0 flex justify-end gap-3 border-t border-slate-200 bg-white pt-3">
                 <button
                   type="button"
                   className="rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
