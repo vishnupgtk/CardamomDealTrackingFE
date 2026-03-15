@@ -30,6 +30,7 @@ const initialForm = {
   buyerId: "",
   totalKg: "",
   sellingPricePerKg: "",
+  extraCharges: "",
   dealDate: new Date().toISOString().slice(0, 10),
   notes: "",
 };
@@ -79,7 +80,7 @@ export default function SalesPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState("");
   const [editDeal, setEditDeal] = useState(null);
-  const [editForm, setEditForm] = useState({ buyerId: "", sellingPricePerKg: "", dealDate: "", notes: "" });
+  const [editForm, setEditForm] = useState({ buyerId: "", sellingPricePerKg: "", extraCharges: "", dealDate: "", notes: "" });
   const [editError, setEditError] = useState("");
   const [editSaving, setEditSaving] = useState(false);
   const [actionBusyKey, setActionBusyKey] = useState("");
@@ -136,8 +137,9 @@ export default function SalesPage() {
   const totalAmountPreview = useMemo(() => {
     const kg = Number(form.totalKg) || 0;
     const rate = Number(form.sellingPricePerKg) || 0;
-    return kg * rate;
-  }, [form.totalKg, form.sellingPricePerKg]);
+    const extraCharges = Number(form.extraCharges) || 0;
+    return (kg * rate) + extraCharges;
+  }, [form.totalKg, form.sellingPricePerKg, form.extraCharges]);
 
   const shareTotal = useMemo(
     () => partnerShares.reduce((sum, p) => sum + (Number(p.percentage) || 0), 0),
@@ -241,6 +243,7 @@ export default function SalesPage() {
     setEditForm({
       buyerId: row.buyerId,
       sellingPricePerKg: String(row.sellingPricePerKg),
+      extraCharges: String(row.extraCharges ?? 0),
       dealDate: safeDealDate,
       notes: row.notes ?? "",
     });
@@ -260,6 +263,7 @@ export default function SalesPage() {
       await updateDeal(editDeal.dealId, {
         buyerId: editForm.buyerId,
         sellingPricePerKg: Number(editForm.sellingPricePerKg),
+        extraCharges: Number(editForm.extraCharges) || 0,
         dealDate: editForm.dealDate,
         notes: editForm.notes?.trim() || null,
       });
@@ -365,8 +369,9 @@ export default function SalesPage() {
     try {
       const totalKg = Number(form.totalKg);
       const pricePerKg = Number(form.sellingPricePerKg);
+      const extraCharges = Number(form.extraCharges) || 0;
 
-      if (totalKg <= 0 || pricePerKg <= 0 || !form.dealDate) {
+      if (totalKg <= 0 || pricePerKg <= 0 || extraCharges < 0 || !form.dealDate) {
         throw new Error("Please enter valid sales values.");
       }
 
@@ -408,6 +413,7 @@ export default function SalesPage() {
         buyerId,
         totalKg,
         sellingPricePerKg: pricePerKg,
+        extraCharges,
         dealDate: form.dealDate,
         notes: form.notes?.trim() || null,
         partners: partnersPayload,
@@ -537,6 +543,7 @@ export default function SalesPage() {
           },
           { key: "totalKg", label: "Total Kg", render: (r) => formatKg(r.totalKg) },
           { key: "sellingPricePerKg", label: "Sell Price/Kg", render: (r) => `${formatRs(r.sellingPricePerKg)} / kg` },
+          { key: "extraCharges", label: "Extra Charges", render: (r) => formatRs(r.extraCharges) },
           { key: "totalAmount", label: "Deal Amount", render: (r) => formatRs(r.totalAmount) },
           { key: "totalPaid", label: "Paid", render: (r) => formatRs(r.totalPaid) },
           { key: "pendingAmount", label: "Pending", render: (r) => formatRs(r.pendingAmount) },
@@ -711,6 +718,24 @@ export default function SalesPage() {
                         setForm((f) => ({
                           ...f,
                           sellingPricePerKg: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+                  <label className="text-sm">
+                    <span className="mb-1 block font-semibold text-slate-700">
+                      Extra Charges
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 ring-emerald-600 focus:ring-2"
+                      value={form.extraCharges}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          extraCharges: e.target.value,
                         }))
                       }
                     />
@@ -945,6 +970,17 @@ export default function SalesPage() {
                   className="w-full rounded border border-slate-300 px-3 py-2"
                   value={editForm.sellingPricePerKg}
                   onChange={(e) => setEditForm((f) => ({ ...f, sellingPricePerKg: e.target.value }))}
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="mb-1 block font-semibold text-slate-700">Extra Charges</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="w-full rounded border border-slate-300 px-3 py-2"
+                  value={editForm.extraCharges}
+                  onChange={(e) => setEditForm((f) => ({ ...f, extraCharges: e.target.value }))}
                 />
               </label>
               <label className="block text-sm">
