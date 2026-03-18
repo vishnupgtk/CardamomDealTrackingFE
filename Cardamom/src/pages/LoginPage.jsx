@@ -28,12 +28,9 @@ export default function LoginPage() {
   return (
     <div className="auth-shell flex min-h-screen items-center justify-center px-4 py-10">
       <form onSubmit={onSubmit} className="app-panel auth-card w-full max-w-md space-y-4 p-7">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col">
           <img src="/cae-logo.svg" alt="CAE Groups" className="h-10 w-auto" />
-          <div>
-            <h1 className="text-base font-extrabold tracking-tight text-emerald-900">CAE GROUPS</h1>
-            <p className="text-xs text-slate-600">Stock and Sales Tracking</p>
-          </div>
+          <p className="ml-16 mt-1 text-sm font-medium text-slate-600">Stock and Sales Tracking</p>
         </div>
         <h2 className="text-2xl font-bold text-emerald-900">Welcome Back</h2>
         <p className="-mt-2 text-sm text-slate-600">Sign in to continue to your dashboard.</p>
