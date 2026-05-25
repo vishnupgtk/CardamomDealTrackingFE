@@ -10,6 +10,7 @@ import PaymentRequestsPage from "../pages/PaymentRequestsPage";
 import MyProfitPage from "../pages/MyProfitPage";
 import StockPage from "../pages/StockPage";
 import SalesPage from "../pages/SalesPage";
+import RoughWorkPage from "../pages/RoughWorkPage";
 
 export default function AppRouter() {
   return (
@@ -58,6 +59,31 @@ export default function AppRouter() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/rough-notes"
+          element={
+            <ProtectedRoute role="Admin">
+              <RoughWorkPage tool="notes" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/calculator"
+          element={
+            <ProtectedRoute role="Admin">
+              <RoughWorkPage tool="calculator" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/sample-profit"
+          element={
+            <ProtectedRoute role="Admin">
+              <RoughWorkPage tool="profit" />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/admin/rough-work" element={<Navigate to="/admin/rough-notes" replace />} />
         <Route
           path="/partner"
           element={

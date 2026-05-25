@@ -11,6 +11,9 @@ const links = [
   { label: "Sales", to: "/admin/sales" },
   { label: "Users", to: "/admin/users" },
   { label: "Payment Requests", to: "/admin/payment-requests" },
+  { label: "Rough Notes", to: "/admin/rough-notes" },
+  { label: "Basic Calculator", to: "/admin/calculator" },
+  { label: "Sample Profit Calculation", to: "/admin/sample-profit" },
 ];
 
 export default function PaymentRequestsPage() {
